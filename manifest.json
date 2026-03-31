@@ -2,7 +2,7 @@
   "name": "Animals and Us - Révision Vocabulaire",
   "short_name": "Animals & Us",
   "description": "Application ludique pour réviser le vocabulaire anglais sur les animaux",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#667eea",
   "theme_color": "#FF6B6B",
