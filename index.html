@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Animals & Us">
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="Application ludique pour réviser le vocabulaire anglais sur les animaux">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23667eea;stop-opacity:1' /><stop offset='100%' style='stop-color:%23764ba2;stop-opacity:1' /></linearGradient></defs><rect width='180' height='180' fill='url(%23grad)' rx='40'/><text x='90' y='105' font-size='70' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>🐾</text></svg>">
+    <title>Animals and Us - Révision Ludique</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --dark: #2C3E50;
+            --light: #F7F9FB;
+            --success: #95E1D3;
+            --danger: #FF8787;
+            --safe-top: env(safe-area-inset-top, 0);
+            --safe-bottom: env(safe-area-inset-bottom, 0);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+            padding-top: calc(20px + var(--safe-top));
+            padding-bottom: calc(20px + var(--safe-bottom));
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        header h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: clamp(1.8em, 5vw, 3em);
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        header p {
+            font-size: clamp(0.9em, 3vw, 1.1em);
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.6s ease-out 0.1s both;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: clamp(0.85em, 2vw, 1em);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            transform: scale(1.05);
+        }
+
+        .tab-btn:active {
+            transform: scale(0.98);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* FLASHCARD SECTION */
+        .flashcard-container {
+            background: white;
+            border-radius: 20px;
+            padding: clamp(20px, 5vw, 40px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.6s ease-out 0.2s both;
+        }
+
+        .flashcard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            min-width: 150px;
+            background: var(--light);
+            height: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .category-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--light);
+            border-radius: 20px;
+            background: white;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--dark);
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .category-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .category-btn:active {
+            transform: scale(0.95);
+        }
+
+        .flashcard {
+            perspective: 1000px;
+            height: clamp(200px, 50vw, 300px);
+            margin-bottom: 30px;
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            font-size: clamp(1.2em, 5vw, 1.8em);
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            text-align: center;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, var(--primary), var(--danger));
+            color: white;
+            flex-direction: column;
+        }
+
+        .flashcard-front::after {
+            content: "Touchez pour révéler";
+            display: block;
+            font-size: 0.5em;
+            margin-top: 20px;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+
+        .flashcard-back {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            color: var(--dark);
+            transform: rotateY(180deg);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px clamp(15px, 3vw, 30px);
+            border: none;
+            border-radius: 10px;
+            font-size: clamp(0.85em, 2vw, 1em);
+            font-weight: 600;
+            font-family: 'Fredoka', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            -webkit-appearance: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-known {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-known:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(149, 225, 211, 0.4);
+        }
+
+        .btn-retry {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-retry:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 135, 135, 0.4);
+        }
+
+        .btn-skip {
+            background: var(--accent);
+            color: var(--dark);
+        }
+
+        .btn-skip:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 230, 109, 0.4);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--light), white);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card h3 {
+            color: var(--dark);
+            font-size: 0.75em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            opacity: 0.7;
+        }
+
+        .stat-card p {
+            font-size: clamp(1.5em, 3vw, 2em);
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .completion-message {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            border-radius: 15px;
+            color: white;
+            display: none;
+        }
+
+        .completion-message.show {
+            display: block;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .completion-message h2 {
+            font-size: clamp(1.8em, 5vw, 2.5em);
+            margin-bottom: 15px;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .completion-message p {
+            font-size: clamp(0.9em, 2vw, 1.1em);
+            margin-bottom: 20px;
+        }
+
+        /* VOCABULARY TABLE SECTION */
+        .vocab-container {
+            background: white;
+            border-radius: 20px;
+            padding: clamp(20px, 5vw, 40px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.6s ease-out 0.2s both;
+        }
+
+        .vocab-search {
+            margin-bottom: 30px;
+        }
+
+        .vocab-search input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid var(--light);
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .vocab-search input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);
+        }
+
+        .vocab-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .vocab-table th {
+            background: linear-gradient(135deg, var(--primary), var(--danger));
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .vocab-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--light);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95em;
+        }
+
+        .vocab-table tr:hover {
+            background: var(--light);
+            transition: all 0.2s ease;
+        }
+
+        .vocab-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .category-humans { background: #FFE5E5; color: #C41E3A; }
+        .category-suffering { background: #E5F5FF; color: #003D82; }
+        .category-protection { background: #E5FFE5; color: #2D5016; }
+        .category-action { background: #FFF5E5; color: #8B4513; }
+
+        .install-prompt {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideDown 0.5s ease-out;
+        }
+
+        .install-prompt.show {
+            display: flex;
+        }
+
+        .install-prompt button {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .install-prompt button:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+                padding-top: calc(15px + var(--safe-top));
+                padding-bottom: calc(15px + var(--safe-bottom));
+            }
+
+            .flashcard-container, .vocab-container {
+                padding: 15px;
+            }
+
+            .button-group {
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+        }
+
+        /* Optimisation pour iPhone notch */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(20px, env(safe-area-inset-left));
+                padding-right: max(20px, env(safe-area-inset-right));
+                padding-top: max(20px, env(safe-area-inset-top));
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="installPrompt" class="install-prompt">
+        <span>Installer l'application sur votre écran d'accueil</span>
+        <button onclick="installApp()">Installer</button>
+        <button onclick="dismissInstall()" style="background: #ccc; color: #333;">Fermer</button>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>🐾 Animals and Us 🐾</h1>
+            <p>Maîtrisez le vocabulaire anglais avec des flashcards ludiques</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('flashcards')">📚 Flashcards</button>
+            <button class="tab-btn" onclick="switchTab('vocabulary')">📖 Vocabulaire</button>
+        </div>
+
+        <!-- FLASHCARDS TAB -->
+        <div id="flashcards" class="tab-content active">
+            <div class="flashcard-container">
+                <div class="flashcard-header">
+                    <div style="flex: 1; min-width: 150px;">
+                        <h2 style="margin-bottom: 10px; font-size: clamp(1em, 2vw, 1.3em);">Progression</h2>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <p id="cardCounter" style="font-weight: 600; font-size: clamp(0.9em, 2vw, 1.1em);"></p>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <h3>Réussies</h3>
+                        <p id="statsCorrect">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>À revoir</h3>
+                        <p id="statsRetry">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Sautées</h3>
+                        <p id="statsSkipped">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Score</h3>
+                        <p id="statsScore">0%</p>
+                    </div>
+                </div>
+
+                <div>
+                    <p style="text-align: center; margin-bottom: 20px; font-weight: 600; color: var(--dark); font-size: clamp(0.9em, 2vw, 1em);">Choisissez une catégorie :</p>
+                    <div class="category-selector">
+                        <button class="category-btn active" onclick="filterCategory('all')">Toutes</button>
+                        <button class="category-btn" onclick="filterCategory('humans')">Humains</button>
+                        <button class="category-btn" onclick="filterCategory('suffering')">Souffrance</button>
+                        <button class="category-btn" onclick="filterCategory('protection')">Protection</button>
+                        <button class="category-btn" onclick="filterCategory('action')">Action</button>
+                    </div>
+                </div>
+
+                <div class="flashcard" id="flashcard">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-face flashcard-front">
+                            <span id="cardFront">Appuyez pour commencer</span>
+                        </div>
+                        <div class="flashcard-face flashcard-back">
+                            <div>
+                                <span id="cardBack"></span>
+                                <br><small style="font-size: 0.4em; margin-top: 15px; opacity: 0.7;">Traduction</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-known" onclick="markKnown()">✓ Je connais</button>
+                    <button class="btn btn-retry" onclick="markRetry()">↻ À revoir</button>
+                    <button class="btn btn-skip" onclick="skipCard()">→ Passer</button>
+                </div>
+
+                <div class="completion-message" id="completionMessage">
+                    <h2>🎉 Bravo ! 🎉</h2>
+                    <p>Vous avez terminé tous les mots de cette catégorie !</p>
+                    <button class="btn btn-known" onclick="resetCards()" style="margin: 20px auto 0;">Recommencer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VOCABULARY TAB -->
+        <div id="vocabulary" class="tab-content">
+            <div class="vocab-container">
+                <h2 style="margin-bottom: 30px; color: var(--dark); font-size: clamp(1.3em, 3vw, 1.8em);">📚 Vocabulaire Complet</h2>
+                
+                <div class="vocab-search">
+                    <input type="text" id="searchInput" placeholder="🔍 Recherchez un mot..." onkeyup="filterVocab()">
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="vocab-table">
+                        <thead>
+                            <tr>
+                                <th>Anglais</th>
+                                <th>Français</th>
+                                <th>Catégorie</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vocabBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const vocabulary = [
+            // HUMANS AND ANIMALS
+            { word: "cattle", translation: "le bétail", category: "humans" },
+            { word: "an emotional support animal", translation: "un animal de soutien émotionnel", category: "humans" },
+            { word: "a lab rat", translation: "un rat de laboratoire", category: "humans" },
+            { word: "a pet", translation: "un animal de compagnie", category: "humans" },
+            { word: "a pet owner", translation: "le propriétaire d'un animal de compagnie", category: "humans" },
+            { word: "a pet shop", translation: "une animalerie", category: "humans" },
+            { word: "a pet sitter", translation: "un(e) garden(ne) d'animaux de compagnie", category: "humans" },
+            { word: "a stray", translation: "un animal errant", category: "humans" },
+            { word: "a tamer", translation: "un(e) dompteur(euse)", category: "humans" },
+            { word: "a trained service animal", translation: "un animal dressé pour aider l'homme", category: "humans" },
+            { word: "a trainer", translation: "un(e) dresseur(euse)", category: "humans" },
+            { word: "a veterinarian", translation: "un(e) vétérinaire", category: "humans" },
+            { word: "a zookeeper", translation: "un(e) gardien(ne) de zoo", category: "humans" },
+            { word: "to breed", translation: "élever", category: "humans" },
+            { word: "to domesticate", translation: "domestiquer", category: "humans" },
+            { word: "to raise animals", translation: "élever des animaux", category: "humans" },
+
+            // ANIMAL SUFFERING
+            { word: "animal abuse", translation: "la maltraitance animal", category: "suffering" },
+            { word: "animal cruelty", translation: "la cruauté envers les animaux", category: "suffering" },
+            { word: "animal testing", translation: "les tests sur animaux", category: "suffering" },
+            { word: "battery cages", translation: "les cages pour l'élevage en batteries", category: "suffering" },
+            { word: "captivity", translation: "la captivité", category: "suffering" },
+            { word: "cloning", translation: "le clonage", category: "suffering" },
+            { word: "an endangered species", translation: "une espèce menacée", category: "suffering" },
+            { word: "an experiment", translation: "une expérience scientifique", category: "suffering" },
+            { word: "an extinct species", translation: "une espèce disparue", category: "suffering" },
+            { word: "factory farming", translation: "l'élevage industriel", category: "suffering" },
+            { word: "genetic engineering", translation: "la modification génétique", category: "suffering" },
+            { word: "a GMO", translation: "un OGM (Organisme Génétiquement Modifié)", category: "suffering" },
+            { word: "intensive farming", translation: "l'agriculture intensive", category: "suffering" },
+            { word: "to abuse", translation: "maltraiter", category: "suffering" },
+            { word: "to be crammed in", translation: "être tassé(e) dans", category: "suffering" },
+            { word: "to hunt", translation: "chasser", category: "suffering" },
+            { word: "to mistreat", translation: "maltraiter", category: "suffering" },
+            { word: "to neglect", translation: "négliger", category: "suffering" },
+            { word: "to poach", translation: "braconner", category: "suffering" },
+            { word: "to smuggle", translation: "passer en contrebande", category: "suffering" },
+
+            // ANIMAL PROTECTION
+            { word: "a natural reserve", translation: "une réserve naturelle", category: "protection" },
+            { word: "the welfare", translation: "le bien-être", category: "protection" },
+            { word: "a wildlife sanctuary", translation: "une réserve naturelle", category: "protection" },
+            { word: "cruelty-free", translation: "qui ne fait pas de tests sur animaux", category: "protection" },
+            { word: "to roam free", translation: "aller librement", category: "protection" },
+            { word: "compassion", translation: "la compassion", category: "protection" },
+            { word: "conservation", translation: "la protection, la préservation", category: "protection" },
+            { word: "empathy", translation: "l'empathie", category: "protection" },
+            { word: "ethology", translation: "l'éthologie, l'étude du comportement animal", category: "protection" },
+            { word: "free-range farming", translation: "l'élevage en plein air", category: "protection" },
+            { word: "a legal status", translation: "un statut légal", category: "protection" },
+            { word: "a natural habitat", translation: "un habitat naturel", category: "protection" },
+            { word: "a shelter", translation: "un refuge", category: "protection" },
+
+            // TAKING ACTION
+            { word: "animal advocacy", translation: "la défense des animaux", category: "action" },
+            { word: "activism", translation: "l'activisme, l'engagement citoyen", category: "action" },
+            { word: "civil disobedience", translation: "la désobéissance civile", category: "action" },
+            { word: "an NGO", translation: "une ONG (organisation non-gouvernementale)", category: "action" },
+            { word: "an open rescue", translation: "un sauvetage illégal d'animaux exploités", category: "action" },
+            { word: "a petition", translation: "une pétition", category: "action" },
+            { word: "a reform", translation: "une réforme", category: "action" },
+            { word: "sustainability", translation: "la durabilité", category: "action" },
+            { word: "veganism", translation: "le véganimisme", category: "action" },
+            { word: "to canvass the streets", translation: "démarcher dans les rues", category: "action" },
+            { word: "to free", translation: "libérer", category: "action" },
+            { word: "to lobby", translation: "faire pression sur, faire du lobbying", category: "action" },
+            { word: "to march", translation: "manifester", category: "action" },
+            { word: "to protest", translation: "dénoncer, manifester", category: "action" },
+            { word: "to set free", translation: "libérer", category: "action" }
+        ];
+
+        let currentCards = [];
+        let currentIndex = 0;
+        let stats = {
+            correct: 0,
+            retry: 0,
+            skipped: 0
+        };
+        let currentCategory = 'all';
+        let deferredPrompt;
+
+        // Enregistrer le Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js').catch(err => {
+                console.log('Service Worker non disponible:', err);
+            });
+        }
+
+        // Gestion de l'installation PWA
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').classList.add('show');
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('App installée !');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('installPrompt').classList.remove('show');
+                });
+            }
+        }
+
+        function dismissInstall() {
+            document.getElementById('installPrompt').classList.remove('show');
+        }
+
+        function initGame() {
+            loadCards();
+            displayCard();
+            populateVocabTable();
+            loadStats();
+        }
+
+        function loadCards() {
+            if (currentCategory === 'all') {
+                currentCards = [...vocabulary];
+            } else {
+                currentCards = vocabulary.filter(v => v.category === currentCategory);
+            }
+            currentIndex = 0;
+            updateProgress();
+        }
+
+        function filterCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            resetCards();
+        }
+
+        function displayCard() {
+            if (currentIndex >= currentCards.length) {
+                showCompletion();
+                return;
+            }
+
+            const card = currentCards[currentIndex];
+            document.getElementById('cardFront').textContent = card.word;
+            document.getElementById('cardBack').textContent = card.translation;
+            document.getElementById('flashcard').classList.remove('flipped');
+            document.getElementById('completionMessage').classList.remove('show');
+            updateProgress();
+        }
+
+        function flipCard() {
+            document.getElementById('flashcard').classList.toggle('flipped');
+        }
+
+        function markKnown() {
+            stats.correct++;
+            nextCard();
+        }
+
+        function markRetry() {
+            stats.retry++;
+            const card = currentCards[currentIndex];
+            currentCards.push(card);
+            nextCard();
+        }
+
+        function skipCard() {
+            stats.skipped++;
+            nextCard();
+        }
+
+        function nextCard() {
+            currentIndex++;
+            displayCard();
+            updateStats();
+            saveStats();
+        }
+
+        function updateProgress() {
+            const percentage = currentCards.length > 0 ? (currentIndex / currentCards.length) * 100 : 0;
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('cardCounter').textContent = `${currentIndex + 1}/${currentCards.length}`;
+        }
+
+        function updateStats() {
+            const total = stats.correct + stats.retry + stats.skipped;
+            const percentage = total > 0 ? Math.round((stats.correct / total) * 100) : 0;
+            
+            document.getElementById('statsCorrect').textContent = stats.correct;
+            document.getElementById('statsRetry').textContent = stats.retry;
+            document.getElementById('statsSkipped').textContent = stats.skipped;
+            document.getElementById('statsScore').textContent = percentage + '%';
+        }
+
+        function showCompletion() {
+            document.getElementById('completionMessage').classList.add('show');
+            document.getElementById('flashcard').style.opacity = '0.5';
+            document.getElementById('flashcard').style.pointerEvents = 'none';
+            document.querySelectorAll('.button-group button').forEach(btn => {
+                btn.style.opacity = '0.5';
+                btn.style.pointerEvents = 'none';
+            });
+        }
+
+        function resetCards() {
+            stats = { correct: 0, retry: 0, skipped: 0 };
+            currentIndex = 0;
+            updateStats();
+            loadCards();
+            displayCard();
+            document.getElementById('flashcard').style.opacity = '1';
+            document.getElementById('flashcard').style.pointerEvents = 'auto';
+            document.querySelectorAll('.button-group button').forEach(btn => {
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+            });
+            saveStats();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function populateVocabTable() {
+            const tbody = document.getElementById('vocabBody');
+            tbody.innerHTML = '';
+            
+            const categoryNames = {
+                'humans': 'Humains et Animaux',
+                'suffering': 'Souffrance Animale',
+                'protection': 'Protection Animale',
+                'action': 'Agir pour les Animaux'
+            };
+
+            vocabulary.forEach(item => {
+                const row = document.createElement('tr');
+                const categoryClass = 'category-' + item.category;
+                const categoryLabel = categoryNames[item.category];
+                row.innerHTML = `
+                    <td><strong>${item.word}</strong></td>
+                    <td>${item.translation}</td>
+                    <td><span class="category-badge ${categoryClass}">${categoryLabel}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function filterVocab() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#vocabBody tr');
+            
+            rows.forEach(row => {
+                const word = row.cells[0].textContent.toLowerCase();
+                const translation = row.cells[1].textContent.toLowerCase();
+                
+                if (word.includes(searchTerm) || translation.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Sauvegarde des statistiques dans le stockage local
+        function saveStats() {
+            localStorage.setItem('animalsStats', JSON.stringify({
+                stats: stats,
+                category: currentCategory,
+                timestamp: new Date().getTime()
+            }));
+        }
+
+        function loadStats() {
+            const saved = localStorage.getItem('animalsStats');
+            if (saved) {
+                const data = JSON.parse(saved);
+                stats = data.stats;
+                updateStats();
+            }
+        }
+
+        // Initialiser au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashcard = document.getElementById('flashcard');
+            
+            flashcard.addEventListener('click', flipCard);
+            flashcard.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                flipCard();
+            });
+            
+            flashcard.style.cursor = 'pointer';
+            flashcard.style.WebkitTouchCallout = 'none';
+            flashcard.style.WebkitUserSelect = 'none';
+            
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.style.WebkitAppearance = 'none';
+                btn.style.WebkitTouchCallout = 'none';
+            });
+            
+            initGame();
+        });
+
+        // Sauvegarder avant de quitter
+        window.addEventListener('beforeunload', saveStats);
+    </script>
+</body>
+</html>
